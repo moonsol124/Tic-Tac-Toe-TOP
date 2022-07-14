@@ -1,0 +1,451 @@
+<style>
+    :root {
+        --inset-shadow: inset 0rem 0rem 1rem black;
+        --button-inset-shadow: inset 0rem 0rem .5rem black;
+        --radius: 10px;
+        --white-border: 1px solid white;
+        --black-border: 1px solid black;
+        --board-marking: max(7rem);
+        --standard-padding: 1rem;
+        --button-padding: .2rem .8rem;
+        --standard-font-size: 1.8rem;
+    }
+
+    * {
+        padding: 0px;
+        margin: 0px;
+        font-family: 'ComiliBook', Arial, Helvetica, sans-serif;
+        font-style: normal;
+        font-weight: bold;
+    }
+
+    body {
+        min-height: 100vh;
+        overflow: auto;
+        background-color: black;
+        display: grid;
+        position: relative;
+        grid-template-columns: 1fr;
+        grid-template-rows: 100px 1fr;
+        justify-items: center;
+        align-items: center;
+    }
+
+    .player-info {
+        background-color: white;
+        width: 60%;
+        height: 100%;
+        padding: var(--standard-padding);
+        border-radius: var(--radius);
+        display: grid;
+        justify-content: center;
+        align-items: center;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        margin-top: 2rem;
+        margin-bottom: 10px;
+        box-shadow: var(--inset-shadow);
+    }
+
+    .player-info > h1{
+        grid-row: 1;
+        grid-column: 1/3;
+        text-align: center;
+    }
+
+    .player-info > div {
+        display: grid;
+    }
+    .board {
+        width: 45%;
+        height: 80%;
+        background-color: white;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        border: var(--black-border);
+        border-radius: var(--radius);
+        padding: var(--standard-padding);
+        box-shadow: var(--inset-shadow);
+    }
+
+    .board > div {
+        border: var(--black-border);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .board-box {
+        display: flex;
+        font-size: var(--board-marking);
+    }
+
+    .user-input {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .user-input > form {
+        border: var(--white-border);
+        border-radius: var(--radius);
+        color: white;
+        min-width: 40%;
+        min-height: 70%;
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        padding: var(--standard-padding);
+        font-size: var(--standard-font-size);
+    }
+
+    .players {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        font-size: var(--standard-font-size);
+        padding: var(--standard-padding);
+    }
+
+    .players > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1rem;
+        align-items: center;
+    }
+    
+    .players > div > input {
+        width: 50%;
+        border-radius: var(--radius);
+        border-color: black;
+    }
+
+    form > div{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    button, input {
+        font-size: inherit;
+        font-family: inherit;
+        box-shadow: var(--button-inset-shadow);
+    }
+
+    input {
+        padding: .2rem;
+        display: block;
+        color: black;
+    }
+
+    button {
+        background-color: white;
+        border-color: black;
+        padding: var(--button-padding);
+        border-radius: var(--radius);
+        font-weight: bold;
+    }
+    button:hover {
+        transform: scale(1.1);
+    }
+    button:active {
+        transform: scale(1.1) translate(0px, 5px);
+    }
+
+    @keyframes hide{
+        from {opacity: 1;}
+        to {opacity: 0;}
+    }
+
+    @keyframes make-invisible{
+        from {visibility: visible;}
+        to {visibility: hidden;}
+    }
+
+    .form-hide {
+        animation: hide 1.5s forwards, make-invisible 1s forwards;
+    }
+
+    .restart-btn {
+        position: absolute;
+        top: 8rem;
+        right: 13rem;
+        background-color: white;
+        font-size: var(--standard-font-size);
+    }
+
+    .winner {
+        animation: forWinnerDisplay 0.5s infinite ease-in-out;
+    }
+
+    @keyframes forWinnerDisplay {
+        from {transform: scale(1);}
+        to {transform: scale(1.5);}
+    }
+
+</style>
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/comili" type="text/css"/>
+    <title>Document</title>
+</head>
+<body>
+    <div class="player-info">
+        <h1 id="display-winner">Let's see who wins!</h1>
+        <div>
+            <h2 id="player1-info"></h2>
+            <h2 id="player1-letter"></h2>
+        </div>
+        <div>
+            <h2 id="player2-info"></h2>
+            <h2 id="player2-letter"></h2>
+        </div>
+    </div>
+    <div class="board">
+        <div class="board-box" data-key="0"></div>
+        <div class="board-box" data-key="1"></div>
+        <div class="board-box" data-key="2"></div>
+        <div class="board-box" data-key="3"></div>
+        <div class="board-box" data-key="4"></div>
+        <div class="board-box" data-key="5"></div>
+        <div class="board-box" data-key="6"></div>
+        <div class="board-box" data-key="7"></div>
+        <div class="board-box" data-key="8"></div>
+        <button class="restart-btn">Restart</button>
+    </div>
+    <div class="user-input">
+        <form action="#" method="post">
+            <div class="title">
+                <h1>Tic-Tac-Toe</h1>
+                <p>Made as a part of the The Odin Project course to practice Javascript.</p>
+                <p>Let's have some fun!</p>
+            </div>
+            <div class="players">
+                <div>
+                    <label for="player1">Choose player 1's name:</label>
+                    <input type="text" name="player1" id="player1">
+                </div>
+                <div>
+                    <label for="player2">Choose player 2's name:</label>
+                    <input type="text" name="player2" id="player2">
+                </div>
+            </div>
+            <div class="btns">
+                <div>
+                    <h3>Player 1 may choose between 'O' and 'X'.</h3>
+                </div>
+                <div class="choice-box">
+                    <button type="button" id="o-button">O</button>
+                    <button type="button" id="x-button">X</button>
+                </div>
+                <div class="submit-box">
+                    <button type="button" id="submit-button">Let's start!</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+<script>
+    // TO DO // 
+
+    // 1. gameboard as an array inside of a Gameboard object
+    const Gameboard = (() => {
+        const gameboard = [];
+        return {gameboard};
+    })();
+
+    // 2. the two players are stored in a factory objects.
+    const Player = (name, letter) => {
+        const introduceSelf = () => {
+            console.log(`my name is ${name}.`);
+        }
+
+        return {name, letter, introduceSelf};
+    };
+
+    // 3. a module to keep the flow of the game
+    const DisplayController = (() => {
+        const gameboard = Gameboard;
+        let GA = gameboard.gameboard;
+        const boxes = Array.from(document.querySelectorAll('.board-box'));
+        let gameover = false;
+        let letter = 'O';
+        let count = 0;
+        let player1;
+        let player2;
+        const players = [];
+
+        //player1 chooses between o and x
+        const chooseOX = () => {
+            const oxBtns = Array.from(document.querySelectorAll('#o-button, #x-button'));
+            oxBtns.forEach(btn => {
+                btn.addEventListener('click', e => {
+                    letter = btn.textContent;
+                })
+            })
+        }
+
+        //get the names and its respective letter
+        const getUserInput = () => {
+            const submitBtn = document.querySelector('#submit-button');
+            submitBtn.addEventListener('click', e => {
+                //user information display
+                const userInput = document.querySelector('.user-input');
+                const player1Info = document.getElementById('player1-info');
+                const player2Info = document.getElementById('player2-info');
+                const p1Letter = document.getElementById('player1-letter');
+                const p2Letter = document.getElementById('player2-letter');
+
+                let player1Letter = '';
+                let player2Letter = '';
+                if (letter === 'O') {
+                    player1Letter = 'O';
+                    player2Letter = 'X';
+                }
+                else if (letter === 'X') {
+                    player1Letter = 'X';
+                    player2Letter = 'O';
+                }
+
+                player1 = Player((document.getElementById('player1')).value, player1Letter);
+                player2 = Player((document.getElementById('player2')).value, player2Letter);
+                player1Info.textContent = `Player 1: ${player1.name}`;
+                player2Info.textContent = `Player 2: ${player2.name}`;
+                p1Letter.textContent = `Letter: '${player1Letter}'`;
+                p2Letter.textContent = `Letter: '${player2Letter}'`;
+                players.push(player1);
+                players.push(player2);
+                userInput.classList.add('form-hide');
+            })
+        }
+        
+        //marking the board 
+        const markBoard = (box) => {
+            const boxAtr = parseInt(box.getAttribute('data-key'));
+            if (box.textContent.includes('O') || box.textContent.includes('X')) {
+                return;
+            }
+
+            if (letter === 'O') {
+                if (count%2 === 0) {
+                    turn = 'O';
+                }
+                else {
+                    turn = 'X';
+                }
+            }
+            else if (letter === 'X') {
+                if (count%2 === 0) {
+                    turn = 'X';
+                }
+                else {
+                    turn = 'O';
+                }
+            }
+            count++;
+            box.textContent = turn;
+            GA[boxAtr] = turn;
+        };
+        
+        const announceWinner = (l) => {
+            //find the respective player of the piece
+            const winner = players.find(player => {
+                if (player.letter === l) {
+                    return player;
+                }
+            })
+            const winnerDisplay = document.getElementById('display-winner');
+            winnerDisplay.textContent = `${winner.name}'s victory!`;
+            winnerDisplay.className = 'winner';
+        }
+
+        const checkRow = () => {
+            for (let i = 0; i < 9; i+=3) {
+                if ((GA[i] === GA[i+1] && GA[i] === GA[i+2]) && (typeof(GA[i]) !== 'undefined' || typeof(GA[i+1]) !== 'undefined' || typeof(GA[i+2]) !== 'undefined')) {
+                    announceWinner(GA[i]);
+                    gameover = true;
+                }
+            }
+        };
+
+        const checkColumn = () => {
+            for (let i = 0; i < 3; i++) {
+                if ((GA[i] === GA[i+3] && GA[i] === GA[i+6]) && (typeof(GA[i]) !== 'undefined' || typeof(GA[i+3]) !== 'undefined' || typeof(GA[i+6]) !== 'undefined')) {
+                    announceWinner(GA[i]);
+                    gameover = true;
+                }
+            }
+        }
+
+        const checkDiagonal = () => {
+            for (let i = 0; i < 3; i+=2) {
+                if (i === 0) {
+                    if ((GA[i] === GA[i+4] && GA[i] === GA[i+8]) && (typeof(GA[i]) !== 'undefined' || typeof(GA[i+4]) !== 'undefined' || typeof(GA[i+8]) !== 'undefined')) {
+                        announceWinner(GA[i]);
+                        gameover = true;
+                    }
+                }
+                else {
+                    if ((GA[i] === GA[i+2] && GA[i] === GA[i+4]) && (typeof(GA[i]) !== 'undefined' || typeof(GA[i+2]) !== 'undefined' || typeof(GA[i+4]) !== 'undefined')) {
+                        announceWinner(GA[i]);
+                        gameover = true;
+                    }
+                }
+            }
+        }
+
+        const restart = () => {
+            const restartBtn = document.querySelector('.restart-btn');
+            restartBtn.addEventListener('click', e => {
+                boxes.forEach (box => {
+                    box.textContent = "";
+                    GA = [];
+                    gameover = false;
+                    count = 0;
+                    const winnerDisplay = document.getElementById('display-winner');
+                    winnerDisplay.textContent = "Let's see who wins!";
+                    winnerDisplay.className = '';
+                })
+            })
+        }
+
+        const render = () => {
+            chooseOX();
+            getUserInput();
+            restart();
+
+            boxes.forEach (box => {
+                //stopping the game cause there is a winner
+                box.addEventListener('click', e => {
+                    if (gameover === true) {
+                        return;
+                    }
+                    markBoard(box);
+                    checkRow();
+                    checkColumn();
+                    checkDiagonal();
+                })
+            })
+        };
+        return {render};
+    })();
+
+    const ds = DisplayController;
+    ds.render();
+
+    // 4. no global codes
+    // 5. only one of something, module. multiple such as players, then factory.
+    // 6. a Js function to render
+</script>
+</html>
